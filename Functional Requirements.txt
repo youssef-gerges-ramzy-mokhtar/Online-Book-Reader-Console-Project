@@ -1,0 +1,71 @@
+The system should support 2 kinds of user
+	- Admin Users
+	- Normal Users
+
+===== MVP Features =====
+Admin Users Functionalities:
+	1. Admin users cannot signup they can only sign-in to the system
+		- this implies that Admin Users are added to the System manually
+	
+	2. Admins can Add books
+	3. Admins can view their profile
+		- viewing profile include the following {name, email, username}
+
+	4. Admins can Logout
+
+Normal Users Functionalities:
+	1. Users can signup and login to the Online Book Reader System
+		- For now we should assume that all users behave properly during signup and we don't require to perform validations on the user input
+	
+	2. Normal Users can view their profile
+		- viewing profile include the following {name, email, username}
+
+	3. List all Available Books in the System
+		- After listing all available books, we should ask the user to choose a book to read
+		- After the user selects a book to read he should view the Current Page of the book and move to the next page or previous page in the book
+		- The user should have the option to Stop Reading
+			[.] When the user stops reading, the current page of the current book should be saved to his reading history
+
+	4. The user should be able to Browse his reading history, and continue reading from where he stopped
+		- The reading history should store the latest access time of this reading session
+
+Additional Notes:
+	- For simplicity all the information about books and users are stored in the Memory
+		[.] That means that one the program is closed all the data disappears
+
+===== Additional/Optional Features =====
+Admin Users Additional Functionalities:
+	1. Admins should be able to do the following operations on books
+		- Delete existing books
+		- Edit the information of existing books
+		- View all current books in the System
+	
+Normal users Functionalities:
+	1. Users should be able to clear all the current reading histories
+
+Other Functionalities:
+	1. We should be able to save be able to save the following information into files to have presistent data
+		- User Information (for login & signup)
+		- Books in the System
+		- Readings Histories of Users
+
+	2. Allow Parallel sessions, which means allow two instances of the Online Book Reader program to run at the same time and view the most recent changed data at real time
+		- This means that files that contain the program data should be always up-to date, and any data used in the program should be always read from the files
+		- e.g. We can have an Admin & a Normal User using the program at the same time, the User should be able to view books added by the Admin at without the need to restart the program
+
+	3. The System should maintain a log file that mains all the changes made by admins on books
+		- e.g. the log file could look as following:
+		admin1 added book1 at 2021-12-29 10:24:59
+		admin2 added book2 at 2021-12-30 10:15:31
+		admin3 removed book1 at 2022-01-01 05:29:07
+
+
+
+
+
+
+
+
+
+
+
