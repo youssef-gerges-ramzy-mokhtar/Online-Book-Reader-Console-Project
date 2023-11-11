@@ -5,6 +5,10 @@ using namespace std;
 	Notes:
 		1. menu seems a frequent operation in most of the classes might create a helper function that handles the menu operation
 		2. Later should make BookHandler a Singelton Class
+	
+	Bugs:
+		1. When normal user logouts and log back-in all his sessions data is lost
+			- That is because in the Login Class we are storing just the UserInfo and every time the user Logs in we create a new NormalUser Object
 */
 
 // Helper Functions //
@@ -54,13 +58,14 @@ private:
 
 		for (auto &registeredUser: users)
 			if (registeredUser.sameUserCredentials(user))
-				return user;
+				return registeredUser;
 
 		return {"#", "#", "#", "#", 0};
 	}
 
 	UserInfo signup() {
 		UserInfo user;
+		user.isAdmin = false;
 
 		cout << "Enter user name (No spaces): ";
 		cin >> user.username;
@@ -78,8 +83,17 @@ private:
 		return user;
 	}
 
+	void hardCodeAdminUsers() {
+		UserInfo admin1 = {"youssef", "youssef123", "youssef_gerges_ramzy", "youssef@yahoo.com", true};
+		UserInfo admin2 = {"mostafa", "mostafa321", "mostafa_saad_ibrahim", "mostafa@gmail.com", true};
+		users.push_back(admin1);
+		users.push_back(admin2);
+	}
+
 public:
-	Login() {}
+	Login() {
+		this->hardCodeAdminUsers();
+	}
 
 	UserInfo loginMenu() {
 		cout << "Menu:\n";
@@ -107,7 +121,7 @@ private:
 	string author;
 
 	void nextPage() {
-		if (curPage < pages.size())
+		if (curPage < (int) pages.size()-1)
 			++curPage;
 	}
 
@@ -171,7 +185,7 @@ private:
 	vector<Book> books;
 
 	void displayBooks() {
-		cout << "Our current book collection:";
+		cout << "Our current book collection:\n";
 		for (int i = 0; i < books.size(); i++) 
 			cout << "\t" << i+1 << " " << books[i].getName() << "\n";
 	}
@@ -184,8 +198,8 @@ public:
 	Book selectBook() {
 		displayBooks();
 		
-		cout << "\nWhich book to read?:";
-		cout << "Enter number in range 1 - 3: ";
+		cout << "\nWhich book to read?:\n";
+		cout << "Enter number in range 1 - " << books.size() << ": ";
 		int choice;
 		cin >> choice;
 
@@ -216,7 +230,7 @@ public:
 		displayHistory();
 		
 		int choice;
-		cout << "\nWhich sessions to opne?:";
+		cout << "\nWhich sessions to open?: \n";
 		cout << "Enter number in range 1 - " << sessions.size() << ": ";
 		cin >> choice;
 
@@ -224,13 +238,14 @@ public:
 		assert(0 <= choice && choice < sessions.size());
 
 		sessions[choice].first.menu();
+		sessions[choice].second = currentDateTime();
 	}
 };
 
 class AdminUser {
 private:
 	UserInfo user;
-	BookHandler bookHandler;
+	BookHandler &bookHandler;
 
 	void addBook() {
 		int isbn;
@@ -261,13 +276,13 @@ private:
 		}
 
 		bookHandler.addBook(book);
+		cout << "\n";
 	}
 
 public:
-	AdminUser(UserInfo user, const BookHandler &bookHandler) {
-		this->user = user;
-		this->bookHandler = bookHandler;
-	}
+	AdminUser(UserInfo user, BookHandler &bookHandler) : 
+		user(user),
+		bookHandler(bookHandler) {}
 
 	void menu() {
 		while (true) {
@@ -307,9 +322,7 @@ private:
 	}
 
 public:
-	NormalUser(UserInfo user, const BookHandler &bookHandler) {
-		this->user = user;
-		this->bookHandler = bookHandler;
+	NormalUser(UserInfo user, BookHandler &bookHandler) : user(user), bookHandler(bookHandler) {
 		this->readingHistory = ReadingHistory();
 	}
 
@@ -338,6 +351,38 @@ public:
 	}
 };
 
+class OnlineBookReader {
+private:
+	Login login;
+
+public:
+	OnlineBookReader() {
+		this->login = Login();
+	}
+
+	void run() {
+		BookHandler bookHandler = BookHandler();
+
+		while (true) {
+			UserInfo userInfo = login.loginMenu();
+			cout << "Hello " << userInfo.name << " | ";
+
+			if (userInfo.isAdmin) {
+				cout << "Admin View\n\n";
+				AdminUser user = AdminUser(userInfo, bookHandler);
+				user.menu();
+			} else {
+				cout << "User View\n\n";
+				NormalUser user = NormalUser(userInfo, bookHandler);
+				user.menu();
+			}
+		}
+	}
+};
+
 int main() {
+	OnlineBookReader onlineBookReader;
+	onlineBookReader.run();
+
 	return 0;
 }
