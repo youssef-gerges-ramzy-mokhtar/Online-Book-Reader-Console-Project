@@ -1,6 +1,19 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+// Helper Functions //
+string currentDateTime() {
+    auto currentTime = std::chrono::system_clock::now();
+    auto time = chrono::system_clock::to_time_t(currentTime);
+    string format = "%Y-%m-%d %H:%M:%S";
+    
+    tm* timeinfo = localtime(&time);
+    char buffer[70];
+    strftime(buffer, sizeof(buffer), format.c_str(), timeinfo);
+    return buffer;
+}
+// Helper Functions //
+
 struct UserInfo {
 	string username;
 	string password;
@@ -99,7 +112,7 @@ private:
 
 	void readPage() {
 		assert(0 <= curPage && curPage < pages.size());
-		cout << "Current Page: " << curPage+1 << "/" << pages.size() << "\n";
+		cout << "Current Page: " << this->currentPage() << "\n";
 		cout << pages[curPage] << "\n\n";
 	}
 
@@ -118,12 +131,7 @@ public:
 	void menu() {
 		int choice = 2;
 		while (true) {
-			if (choice == 1)
-				nextPage(), readPage();
-			else if (choice == 2)
-				prevPage(), readPage();
-			else
-				break;
+			readPage();
 
 			cout << "Menu:\n";
 			cout << "\t1. Next Page\n";
@@ -132,12 +140,23 @@ public:
 
 			cout << "Enter number in range 1 - 3: ";
 			cin >> choice;
+
+			if (choice == 1)
+				nextPage();
+			else if (choice == 2)
+				prevPage();
+			else
+				break;
 		}
 	}
 
 	// Getters //
 	string getName() {
 		return this->title;
+	}
+
+	string currentPage() {
+		return to_string(curPage+1) + "/" + to_string(pages.size());
 	}
 };
 
@@ -170,7 +189,38 @@ public:
 	}
 };
 
+class ReadingHistory {
+private:
+	vector<pair<Book, string>> sessions;
+
+	void displayHistory() {
+		for (int i = 0; i < sessions.size(); i++) {
+			auto &book = sessions[i].first;
+			auto &sessionTime = sessions[i].second;
+			cout << i+1 << ": " << book.getName() << ": " << book.currentPage() << " - " << sessionTime << endl;
+		}
+	}
+
+public:
+	addBook(Book book) {
+		sessions.push_back({book, currentDateTime()});
+	}
+
+	void menu() {
+		displayHistory();
+		
+		int choice;
+		cout << "\nWhich sessions to opne?:";
+		cout << "Enter number in range 1 - " << sessions.size() << ": ";
+		cin >> choice;
+
+		--choice;
+		assert(0 <= choice && choice < sessions.size());
+
+		sessions[choice].first.menu();
+	}
+};
+
 int main() {
-	
 	return 0;
 }
