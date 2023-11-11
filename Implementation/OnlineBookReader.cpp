@@ -290,6 +290,54 @@ public:
 	}
 };
 
+class NormalUser {
+private:
+	UserInfo user;
+	BookHandler bookHandler;
+	ReadingHistory readingHistory;
+
+	void browseBooks() {
+		Book book = bookHandler.selectBook();
+		book.menu();
+		this->readingHistory.addBook(book);
+	}
+
+	void viewHistory() {
+		readingHistory.menu();
+	}
+
+public:
+	NormalUser(UserInfo user, const BookHandler &bookHandler) {
+		this->user = user;
+		this->bookHandler = bookHandler;
+		this->readingHistory = ReadingHistory();
+	}
+
+	void menu() {
+		while (true) {
+			cout << "Menu:\n";
+			cout << "\t1: View Profile\n";
+			cout << "\t2: List & Select from My Reading History\n";
+			cout << "\t3: List & Select from Available Books\n";
+			cout << "\t4: Logout\n\n";
+
+			int choice;
+			cout << "Enter number in range 1 - 4: ";
+			cin >> choice;
+			assert(1 <= choice && choice <= 4);
+
+			if (choice == 1)
+				user.viewProfile();
+			else if (choice == 2)
+				viewHistory();
+			else if (choice == 3)
+				browseBooks();
+			else
+				break;
+		}
+	}
+};
+
 int main() {
 	return 0;
 }
