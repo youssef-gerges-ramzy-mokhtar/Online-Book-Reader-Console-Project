@@ -1,6 +1,12 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+/*
+	Notes:
+		1. menu seems a frequent operation in most of the classes might create a helper function that handles the menu operation
+		2. Later should make BookHandler a Singelton Class
+*/
+
 // Helper Functions //
 string currentDateTime() {
     auto currentTime = std::chrono::system_clock::now();
@@ -202,7 +208,7 @@ private:
 	}
 
 public:
-	addBook(Book book) {
+	void addBook(Book book) {
 		sessions.push_back({book, currentDateTime()});
 	}
 
@@ -218,6 +224,69 @@ public:
 		assert(0 <= choice && choice < sessions.size());
 
 		sessions[choice].first.menu();
+	}
+};
+
+class AdminUser {
+private:
+	UserInfo user;
+	BookHandler bookHandler;
+
+	void addBook() {
+		int isbn;
+		string title, author;
+
+		cout << "Enter ISBN: ";
+		cin >> isbn;
+
+		cout << "Enter Title: ";
+		cin >> title;
+
+		cout << "Enter Author Name: ";
+		cin >> author;
+
+		Book book = Book(isbn, title, author);
+
+		int numPages;
+		cout << "Enter How many pages: ";
+		cin >> numPages;
+
+		assert(numPages >= 0);
+		for (int i = 0; i < numPages; i++) {
+			string page;
+			cout << "Enter page # " << i+1 << ": ";
+			cin >> page;
+
+			book.addPage(page);
+		}
+
+		bookHandler.addBook(book);
+	}
+
+public:
+	AdminUser(UserInfo user, const BookHandler &bookHandler) {
+		this->user = user;
+		this->bookHandler = bookHandler;
+	}
+
+	void menu() {
+		while (true) {
+			cout << "Menu:\n";
+			cout << "\t1. View Profile\n";
+			cout << "\t2. Add Book\n";
+			cout << "\t3. Logout\n\n";
+
+			int choice;
+			cout << "Enter number in range 1 - 3: ";
+			cin >> choice;
+
+			if (choice == 1)
+				user.viewProfile();
+			else if (choice == 2)
+				addBook();
+			else
+				break;
+		}
 	}
 };
 
