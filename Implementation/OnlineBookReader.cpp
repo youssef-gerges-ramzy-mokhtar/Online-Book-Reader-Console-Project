@@ -3,12 +3,30 @@ using namespace std;
 
 /*
 	Notes:
-		1. menu seems a frequent operation in most of the classes might create a helper function that handles the menu operation
-		2. Later should make BookHandler a Singelton Class
-	
+		1. Think of using Templates with the UserInfo Mapper
+		class UserInfoMapper {
+		private:
+			unordered_map<string, AdminUser> admins;
+			unordered_map<string, NormalUser> normalUsers;
+
+		public:
+			// AdminUser getAdminUser(string username) {
+				// if (admins.count(username))
+					// return admins[username];
+
+				// AdminUser adminUser;
+				// admins[username]
+			// }
+
+			// NormalUser getNormalUser() {
+
+			// }
+		};
+		
 	Bugs:
 		1. When normal user logouts and log back-in all his sessions data is lost
 			- That is because in the Login Class we are storing just the UserInfo and every time the user Logs in we create a new NormalUser Object
+
 */
 
 // Helper Functions //
@@ -55,69 +73,6 @@ struct UserInfo {
 
 	bool sameUserCredentials(UserInfo &user) {
 		return (user.username == this->username && user.password == this->password);
-	}
-};
-
-class Login {
-private:
-	vector<UserInfo> users;
-
-	UserInfo login() {
-		UserInfo user;
-
-		cout << "Enter user name (No spaces): ";
-		cin >> user.username;
-
-		cout << "Enter password (No spaces): ";
-		cin >> user.password;
-
-		for (auto &registeredUser: users)
-			if (registeredUser.sameUserCredentials(user))
-				return registeredUser;
-
-		return {"#", "#", "#", "#", 0};
-	}
-
-	UserInfo signup() {
-		UserInfo user;
-		user.isAdmin = false;
-
-		cout << "Enter user name (No spaces): ";
-		cin >> user.username;
-
-		cout << "Enter password (No spaces): ";
-		cin >> user.password;
-
-		cout << "Enter name (No spaces): ";
-		cin >> user.name;
-
-		cout << "Enter email (No spaces): ";
-		cin >> user.email;
-
-		users.push_back(user);
-		return user;
-	}
-
-	void hardCodeAdminUsers() {
-		UserInfo admin1 = {"youssef", "youssef123", "youssef_gerges_ramzy", "youssef@yahoo.com", true};
-		UserInfo admin2 = {"mostafa", "mostafa321", "mostafa_saad_ibrahim", "mostafa@gmail.com", true};
-		users.push_back(admin1);
-		users.push_back(admin2);
-	}
-
-public:
-	Login() {
-		this->hardCodeAdminUsers();
-	}
-
-	UserInfo loginMenu() {
-		vector<string> options = {"Login", "Sign Up"};
-		int choice = menuDisplay(options);
-
-		if (choice == 1)
-			return login();
-		else
-			return signup();
 	}
 };
 
@@ -194,6 +149,8 @@ private:
 			cout << "\t" << i+1 << " " << books[i].getName() << "\n";
 	}
 
+	BookHandler() {}
+
 public:
 	void addBook(Book book) {
 		books.push_back(book);
@@ -210,6 +167,11 @@ public:
 		--choice;
 		assert(0 <= choice && choice < books.size());
 		return books[choice];
+	}
+
+	static BookHandler& getInstance() {
+		static BookHandler bookHandler = BookHandler();
+		return bookHandler;
 	}
 };
 
@@ -284,9 +246,9 @@ private:
 	}
 
 public:
-	AdminUser(UserInfo user, BookHandler &bookHandler) : 
+	AdminUser(UserInfo user) : 
 		user(user),
-		bookHandler(bookHandler) {}
+		bookHandler(BookHandler::getInstance()) {}
 
 	void menu() {
 		while (true) {
@@ -306,7 +268,7 @@ public:
 class NormalUser {
 private:
 	UserInfo user;
-	BookHandler bookHandler;
+	BookHandler &bookHandler;
 	ReadingHistory readingHistory;
 
 	void browseBooks() {
@@ -320,7 +282,7 @@ private:
 	}
 
 public:
-	NormalUser(UserInfo user, BookHandler &bookHandler) : user(user), bookHandler(bookHandler) {
+	NormalUser(UserInfo user) : user(user), bookHandler(BookHandler::getInstance()) {
 		this->readingHistory = ReadingHistory();
 	}
 
@@ -341,6 +303,69 @@ public:
 	}
 };
 
+class Login {
+private:
+	vector<UserInfo> users;
+
+	UserInfo login() {
+		UserInfo user;
+
+		cout << "Enter user name (No spaces): ";
+		cin >> user.username;
+
+		cout << "Enter password (No spaces): ";
+		cin >> user.password;
+
+		for (auto &registeredUser: users)
+			if (registeredUser.sameUserCredentials(user))
+				return registeredUser;
+
+		return {"#", "#", "#", "#", 0};
+	}
+
+	UserInfo signup() {
+		UserInfo user;
+		user.isAdmin = false;
+
+		cout << "Enter user name (No spaces): ";
+		cin >> user.username;
+
+		cout << "Enter password (No spaces): ";
+		cin >> user.password;
+
+		cout << "Enter name (No spaces): ";
+		cin >> user.name;
+
+		cout << "Enter email (No spaces): ";
+		cin >> user.email;
+
+		users.push_back(user);
+		return user;
+	}
+
+	void hardCodeAdminUsers() {
+		UserInfo admin1 = {"youssef", "youssef123", "youssef_gerges_ramzy", "youssef@yahoo.com", true};
+		UserInfo admin2 = {"mostafa", "mostafa321", "mostafa_saad_ibrahim", "mostafa@gmail.com", true};
+		users.push_back(admin1);
+		users.push_back(admin2);
+	}
+
+public:
+	Login() {
+		this->hardCodeAdminUsers();
+	}
+
+	UserInfo loginMenu() {
+		vector<string> options = {"Login", "Sign Up"};
+		int choice = menuDisplay(options);
+
+		if (choice == 1)
+			return login();
+		else
+			return signup();
+	}
+};
+
 class OnlineBookReader {
 private:
 	Login login;
@@ -351,19 +376,17 @@ public:
 	}
 
 	void run() {
-		BookHandler bookHandler = BookHandler();
-
 		while (true) {
 			UserInfo userInfo = login.loginMenu();
 			cout << "Hello " << userInfo.name << " | ";
 
 			if (userInfo.isAdmin) {
 				cout << "Admin View\n\n";
-				AdminUser user = AdminUser(userInfo, bookHandler);
+				AdminUser user = AdminUser(userInfo);
 				user.menu();
 			} else {
 				cout << "User View\n\n";
-				NormalUser user = NormalUser(userInfo, bookHandler);
+				NormalUser user = NormalUser(userInfo);
 				user.menu();
 			}
 		}
