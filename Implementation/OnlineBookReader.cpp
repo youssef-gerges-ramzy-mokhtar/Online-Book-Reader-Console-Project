@@ -22,6 +22,21 @@ string currentDateTime() {
     strftime(buffer, sizeof(buffer), format.c_str(), timeinfo);
     return buffer;
 }
+
+int menuDisplay(const vector<string> &options) {
+	cout << "Menu:\n";
+	for (int i = 0; i < options.size(); i++)
+		cout << "\t" << i+1 << ". " << options[i] << "\n";
+	
+	cout << "\n";
+
+	int choice;
+	cout << "Enter number in range 1 - " << options.size() << ": ";
+	cin >> choice;
+
+	assert(1 <= choice && choice <= options.size());
+	return choice;
+}
 // Helper Functions //
 
 struct UserInfo {
@@ -96,14 +111,8 @@ public:
 	}
 
 	UserInfo loginMenu() {
-		cout << "Menu:\n";
-		cout << "\t1. Login\n";
-		cout << "\t2. Sign Up\n";
-		cout << endl;
-
-		int choice;
-		cout << "Enter number in range 1 - 2: ";
-		cin >> choice;
+		vector<string> options = {"Login", "Sign Up"};
+		int choice = menuDisplay(options);
 
 		if (choice == 1)
 			return login();
@@ -150,16 +159,11 @@ public:
 
 	void menu() {
 		int choice = 2;
+		vector<string> options = {"Next Page", "Previous Page", "Stop Reading"};
+
 		while (true) {
 			readPage();
-
-			cout << "Menu:\n";
-			cout << "\t1. Next Page\n";
-			cout << "\t2. Previous Page\n";
-			cout << "\t3. Stop Reading\n";
-
-			cout << "Enter number in range 1 - 3: ";
-			cin >> choice;
+			choice = menuDisplay(options);
 
 			if (choice == 1)
 				nextPage();
@@ -286,14 +290,8 @@ public:
 
 	void menu() {
 		while (true) {
-			cout << "Menu:\n";
-			cout << "\t1. View Profile\n";
-			cout << "\t2. Add Book\n";
-			cout << "\t3. Logout\n\n";
-
-			int choice;
-			cout << "Enter number in range 1 - 3: ";
-			cin >> choice;
+			vector<string> options = {"View Profile", "Add Book", "Logout"};
+			int choice = menuDisplay(options);
 
 			if (choice == 1)
 				user.viewProfile();
@@ -328,16 +326,8 @@ public:
 
 	void menu() {
 		while (true) {
-			cout << "Menu:\n";
-			cout << "\t1: View Profile\n";
-			cout << "\t2: List & Select from My Reading History\n";
-			cout << "\t3: List & Select from Available Books\n";
-			cout << "\t4: Logout\n\n";
-
-			int choice;
-			cout << "Enter number in range 1 - 4: ";
-			cin >> choice;
-			assert(1 <= choice && choice <= 4);
+			vector<string> options = {"View Profile", "List & Select from My Reading History", "List & Select from Available Books", "Logout"}; 
+			int choice = menuDisplay(options);
 
 			if (choice == 1)
 				user.viewProfile();
