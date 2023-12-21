@@ -1,13 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-/*
-	Bugs:
-		1. When normal user logouts and log back-in all his sessions data is lost
-			- That is because in the Login Class we are storing just the UserInfo and every time the user Logs in we create a new NormalUser Object
-
-*/
-
 // Helper Functions //
 string currentDateTime() {
     auto currentTime = std::chrono::system_clock::now();
@@ -404,3 +397,33 @@ int main() {
 
 	return 0;
 }
+
+/*
+	Personal Notes
+
+	1. Design notes:
+		- Speed
+			. The code is to some extent fast, maybe one suggestion is for the login to use a unordered_map instead of just a vector
+		
+		- Code Structure ease of understanding
+			. The code is very logical and very easy to understand and to reason about
+
+		- Keep it Stuip Simple (KISS)
+			. the code is to some extent simple
+
+		- You ain't gonna need it (YAGNI)
+			. We are not implementing any code that doesn't directly server the functional requrirements of the project
+
+		- DRY (Don't repeat yourself)
+			. The code is to some extent very DRY
+			. Maybe the only thing that I can critique is that we are using the menu() function in multiple classes (probably not bad)
+
+		- Decoupled system
+			. Here this might be the worst aspect of the design as the program logic is mixed with the user interface (aka. printing to the console)
+
+		- Single Responsibility
+			. YES every class is responsible for its own tasks
+
+	2. MISC:
+		- It might have been a good idea in the BookHandler to make the data members static and update the static members without making the class singeltong and this would have the same effect of a singelton class. It would been a good idea because for all the classes that was used to creating instances of the BookHandler they will not need to change
+*/
