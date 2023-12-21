@@ -2,27 +2,6 @@
 using namespace std;
 
 /*
-	Notes:
-		1. Think of using Templates with the UserInfo Mapper
-		class UserInfoMapper {
-		private:
-			unordered_map<string, AdminUser> admins;
-			unordered_map<string, NormalUser> normalUsers;
-
-		public:
-			// AdminUser getAdminUser(string username) {
-				// if (admins.count(username))
-					// return admins[username];
-
-				// AdminUser adminUser;
-				// admins[username]
-			// }
-
-			// NormalUser getNormalUser() {
-
-			// }
-		};
-		
 	Bugs:
 		1. When normal user logouts and log back-in all his sessions data is lost
 			- That is because in the Login Class we are storing just the UserInfo and every time the user Logs in we create a new NormalUser Object
@@ -142,6 +121,7 @@ public:
 class BookHandler {
 private:
 	vector<Book> books;
+	static BookHandler *bookHandler;
 
 	void displayBooks() {
 		cout << "Our current book collection:\n";
@@ -169,11 +149,14 @@ public:
 		return books[choice];
 	}
 
-	static BookHandler& getInstance() {
-		static BookHandler bookHandler = BookHandler();
+	static BookHandler* getInstance() {
+		if (bookHandler == nullptr)
+			bookHandler = new BookHandler();
+
 		return bookHandler;
 	}
 };
+BookHandler* BookHandler::bookHandler = nullptr;
 
 class ReadingHistory {
 private:
@@ -193,6 +176,11 @@ public:
 	}
 
 	void menu() {
+		if (sessions.size() == 0) {
+			cout << "You don't have any active sessions\n";
+			return;
+		}
+
 		displayHistory();
 		
 		int choice;
@@ -211,7 +199,7 @@ public:
 class AdminUser {
 private:
 	UserInfo user;
-	BookHandler &bookHandler;
+	BookHandler *bookHandler;
 
 	void addBook() {
 		int isbn;
@@ -241,7 +229,7 @@ private:
 			book.addPage(page);
 		}
 
-		bookHandler.addBook(book);
+		bookHandler->addBook(book);
 		cout << "\n";
 	}
 
@@ -268,11 +256,11 @@ public:
 class NormalUser {
 private:
 	UserInfo user;
-	BookHandler &bookHandler;
+	BookHandler *bookHandler;
 	ReadingHistory readingHistory;
 
 	void browseBooks() {
-		Book book = bookHandler.selectBook();
+		Book book = bookHandler->selectBook();
 		book.menu();
 		this->readingHistory.addBook(book);
 	}
@@ -366,13 +354,30 @@ public:
 	}
 };
 
+class UserInfoMapper {
+private:
+	unordered_map<string, NormalUser> users;
+
+public:
+	NormalUser& getNormalUser(UserInfo userInfo) {
+		if (!users.count(userInfo.username)) {
+			NormalUser user = NormalUser(userInfo);
+			users.emplace(userInfo.username, user);
+		}
+
+		return users.at(userInfo.username);
+	}
+};
+
 class OnlineBookReader {
 private:
 	Login login;
+	UserInfoMapper userInfoMapper;
 
 public:
 	OnlineBookReader() {
 		this->login = Login();
+		this->userInfoMapper = UserInfoMapper();
 	}
 
 	void run() {
@@ -386,7 +391,7 @@ public:
 				user.menu();
 			} else {
 				cout << "User View\n\n";
-				NormalUser user = NormalUser(userInfo);
+				NormalUser& user = userInfoMapper.getNormalUser(userInfo);
 				user.menu();
 			}
 		}
