@@ -420,6 +420,22 @@ int main() {
 
 		- Decoupled system
 			. Here this might be the worst aspect of the design as the program logic is mixed with the user interface (aka. printing to the console)
+			. There might have been 2 solutions to this problem but I felt that it will make the code much more complicated and length:
+				- We could have created a UI Class for every class we have in the project e.g. NormalUserUi, BookUi, BookHandlerUi, etc.. and every UI Class will be responsible for getting the input from the console (User Interface) and each UI Class will have an instance of the normal class and just make a class to the normal class with the inputs got from the user
+				
+				e.g. NormalUserUi will have an instance of NormalUser and will call getHistory() which will return a collection of History Sessions to the NormalUserUi class and it is responsible for displaying it
+
+				But this means that the programmer who is responsible for the front-end is tightly coupled with the classes responsbiel for the main logic
+
+				- A 2nd approach would have been that we will provide a single Wrapper class that has all the methods that the front-end/UI might need to use to operate and this Wrapper Class will contain direct the front-end method calls to the Objects responsbile for the code-logic and return the results back to the front-end
+				
+				e.g. a OnlineBookReaderManager that has an instance of Login, NormalUser, etc..
+				The front-end will make a request as following to the OnlineBookReaderManger getAllSessions(username, email)
+				then the OnlineBookReaderManger will use the Login instance to get the User and will use the NormalUser instance returned by callin gthe getSessions() method of the NormalUser Instance and will return the result back to the front-end
+
+				But this means that the OnlineBookReaderManger have to be very tightly coupled with all the Classes that provide the main logic of the program
+
+			. Last note regarding the decoupling between the Program Logic and User Interface It is Ok for the User Interface Classes to depend on the Logic Classes in any way but it is not OK for the Program Logic to depend on the User Interface. Given that the User Interface should be coupled with the Logic and in that case this means that the User Interface should be able to understand how the Logic is working but the Logic shouldn't be coupled with the User Interface
 
 		- Single Responsibility
 			. YES every class is responsible for its own tasks
